@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Livraria Intelectus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--ink:#1a1410;--parchment:#f7f3ec;--cream:#ede7d9;--gold:#b8973a;--gold-lt:#d4b05a;--rust:#7a3b1e;--fog:#6b6357;--white:#fefcf8}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:var(--parchment);color:var(--ink);overflow-x:hidden}
+
+    /* NAV */
+    nav{position:fixed;top:0;width:100%;z-index:100;background:rgba(26,20,16,0.97);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:space-between;padding:0 4vw;height:64px;border-bottom:1px solid rgba(184,151,58,0.25);gap:1rem}
+    .nav-logo{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--gold);letter-spacing:0.05em;text-decoration:none;white-space:nowrap}
+    .nav-logo span{color:var(--white);font-style:italic}
+    .nav-links{display:flex;gap:1.5rem;list-style:none}
+    .nav-links a{color:rgba(254,252,248,0.7);text-decoration:none;font-size:0.82rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.2s}
+    .nav-links a:hover{color:var(--gold)}
+    .nav-search-wrap{flex:1;max-width:320px;position:relative}
+    .nav-search{width:100%;padding:8px 36px 8px 14px;background:rgba(255,255,255,0.07);border:1px solid rgba(184,151,58,0.25);border-radius:3px;color:var(--white);font-family:'Inter',sans-serif;font-size:0.82rem;outline:none;transition:border-color 0.2s}
+    .nav-search::placeholder{color:rgba(254,252,248,0.4)}
+    .nav-search:focus{border-color:var(--gold);background:rgba(255,255,255,0.1)}
+    .nav-search-icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:rgba(254,252,248,0.4);pointer-events:none;font-size:0.9rem}
+    .nav-btn{background:var(--gold);color:var(--ink);border:none;padding:8px 18px;border-radius:2px;font-family:'Inter',sans-serif;font-weight:600;font-size:0.78rem;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;white-space:nowrap}
+    .nav-btn:hover{background:var(--gold-lt)}
+    .nav-btn-ghost{background:transparent;border:1px solid rgba(184,151,58,0.5);color:var(--gold)}
+    .nav-btn-ghost:hover{background:rgba(184,151,58,0.1)}
+    .cart-badge{background:var(--rust);color:#fff;border-radius:50%;width:18px;height:18px;font-size:0.62rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;vertical-align:middle}
+
+    /* SEARCH RESULTS DROPDOWN */
+    #searchDropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--ink);border:1px solid rgba(184,151,58,0.3);border-radius:4px;z-index:500;max-height:340px;overflow-y:auto;display:none;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+    .search-result-item{display:flex;align-items:center;gap:0.8rem;padding:0.7rem 1rem;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);transition:background 0.15s}
+    .search-result-item:last-child{border-bottom:none}
+    .search-result-item:hover{background:rgba(184,151,58,0.1)}
+    .sri-cover{width:32px;height:44px;border-radius:2px;flex-shrink:0}
+    .sri-info{flex:1;min-width:0}
+    .sri-title{font-size:0.82rem;font-weight:600;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sri-author{font-size:0.72rem;color:rgba(254,252,248,0.5);margin-top:1px}
+    .sri-price{font-size:0.82rem;font-weight:700;color:var(--gold);white-space:nowrap}
+    .search-no-result{padding:1.2rem;text-align:center;color:rgba(254,252,248,0.4);font-size:0.85rem}
+
+    /* HERO */
+    .hero{min-height:100vh;background:var(--ink);display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:64px 0 0;overflow:hidden;position:relative}
+    .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 30% 60%,rgba(184,151,58,0.07) 0%,transparent 70%);pointer-events:none}
+    .hero-text{padding:6vw 5vw 6vw 8vw;position:relative;z-index:2}
+    .hero-eyebrow{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--gold);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:1.5rem}
+    .hero-title{font-family:'Playfair Display',serif;font-size:clamp(3rem,6vw,5.5rem);font-weight:900;line-height:1.0;color:var(--white);margin-bottom:1.8rem}
+    .hero-title em{font-style:italic;color:var(--gold)}
+    .hero-desc{font-size:1rem;line-height:1.75;color:rgba(254,252,248,0.6);max-width:38ch;margin-bottom:2.5rem}
+    .hero-ctas{display:flex;gap:1rem;flex-wrap:wrap}
+    .btn-primary{background:var(--gold);color:var(--ink);border:none;padding:14px 32px;font-family:'Inter',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;text-decoration:none;display:inline-block;transition:background 0.2s,transform 0.15s}
+    .btn-primary:hover{background:var(--gold-lt);transform:translateY(-1px)}
+    .btn-outline{background:transparent;color:var(--white);border:1px solid rgba(254,252,248,0.3);padding:14px 32px;font-family:'Inter',sans-serif;font-weight:500;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;text-decoration:none;display:inline-block;transition:border-color 0.2s,color 0.2s}
+    .btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+    .hero-visual{height:100%;min-height:100vh;display:flex;align-items:flex-end;justify-content:center;padding-bottom:0;position:relative}
+    .bookshelf{display:flex;align-items:flex-end;gap:6px;padding:0 2rem;transform:perspective(800px) rotateY(-6deg)}
+    .book{border-radius:2px 3px 3px 2px;cursor:pointer;transition:transform 0.25s,filter 0.25s;position:relative;box-shadow:-3px 4px 18px rgba(0,0,0,0.5),inset -2px 0 6px rgba(0,0,0,0.3)}
+    .book:hover{transform:translateY(-18px) scale(1.03);filter:brightness(1.1)}
+    .book-spine{writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);color:rgba(255,255,255,0.85);font-family:'Playfair Display',serif;font-size:0.65rem;font-weight:700;padding:12px 4px;letter-spacing:0.08em;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;max-height:100%}
+    .b1{width:32px;height:220px;background:#3d2b1f}.b2{width:28px;height:260px;background:#4a3728}.b3{width:36px;height:200px;background:#1e3a5f}.b4{width:30px;height:280px;background:#5c2d0e}.b5{width:26px;height:240px;background:#2d4a2d}.b6{width:40px;height:310px;background:#1a1a3e}.b7{width:28px;height:190px;background:#5a1a1a}.b8{width:34px;height:270px;background:#3a3010}.b9{width:30px;height:230px;background:#1e3a2a}.b10{width:26px;height:250px;background:#4a1a3a}.b11{width:38px;height:295px;background:#2a1e0e}.b12{width:28px;height:215px;background:#0e2a3a}
+    .shelf-board{position:absolute;bottom:-1px;left:-20px;right:-20px;height:14px;background:linear-gradient(to bottom,#5a3a1a,#3a2010);border-radius:2px;box-shadow:0 6px 20px rgba(0,0,0,0.6)}
+
+    /* STRIP */
+    .strip{background:var(--gold);padding:18px 5vw;display:flex;gap:3rem;align-items:center;justify-content:center;flex-wrap:wrap}
+    .strip-item{display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--ink)}
+
+    /* SECTIONS */
+    section{padding:7rem 8vw}
+    .section-label{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--gold);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:0.8rem}
+    .section-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;line-height:1.15;margin-bottom:1rem;color:var(--ink)}
+    .section-sub{font-size:1rem;color:var(--fog);max-width:52ch;line-height:1.7;margin-bottom:3rem}
+
+    /* CATEGORIES */
+    #categorias{background:var(--cream)}
+    .cat-filter-bar{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+    .cat-filter-btn{padding:6px 16px;border-radius:20px;border:1px solid rgba(26,20,16,0.18);background:transparent;font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:500;cursor:pointer;transition:all 0.2s;color:var(--ink)}
+    .cat-filter-btn:hover,.cat-filter-btn.active{background:var(--gold);border-color:var(--gold);color:var(--ink);font-weight:700}
+    .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem}
+    .cat-card{background:var(--white);border:1px solid rgba(26,20,16,0.08);border-radius:4px;padding:2rem 1.2rem 1.5rem;text-align:center;cursor:pointer;transition:border-color 0.2s,box-shadow 0.2s,transform 0.2s;text-decoration:none;color:inherit;display:block}
+    .cat-card:hover{border-color:var(--gold);box-shadow:0 4px 20px rgba(184,151,58,0.15);transform:translateY(-3px)}
+    .cat-card.hidden{display:none}
+    .cat-icon{font-size:2.2rem;margin-bottom:0.8rem;display:block}
+    .cat-name{font-family:'Playfair Display',serif;font-weight:700;font-size:0.9rem;margin-bottom:0.25rem}
+    .cat-count{font-size:0.72rem;color:var(--fog);font-family:'DM Mono',monospace}
+
+    /* BOOKS */
+    #destaques{background:var(--parchment)}
+    .books-filter-bar{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:2rem;align-items:center}
+    .books-filter-btn{padding:6px 16px;border-radius:20px;border:1px solid rgba(26,20,16,0.18);background:transparent;font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:500;cursor:pointer;transition:all 0.2s;color:var(--ink)}
+    .books-filter-btn:hover,.books-filter-btn.active{background:var(--ink);border-color:var(--ink);color:var(--white)}
+    .books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:2rem}
+    .book-card{background:var(--white);border-radius:4px;overflow:hidden;border:1px solid rgba(26,20,16,0.07);transition:box-shadow 0.25s,transform 0.25s;cursor:pointer}
+    .book-card:hover{box-shadow:0 8px 32px rgba(26,20,16,0.12);transform:translateY(-4px)}
+    .book-card.hidden{display:none}
+    .book-cover{height:280px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .book-cover-inner{width:70%;height:88%;border-radius:2px 6px 6px 2px;display:flex;flex-direction:column;justify-content:space-between;padding:1.2rem 1rem;box-shadow:4px 6px 20px rgba(0,0,0,0.35),inset -3px 0 8px rgba(0,0,0,0.2);position:relative}
+    .book-cover-inner::before{content:'';position:absolute;left:0;top:0;bottom:0;width:8px;background:rgba(0,0,0,0.2);border-radius:2px 0 0 2px}
+    .cover-title{font-family:'Playfair Display',serif;font-size:0.9rem;font-weight:700;color:rgba(255,255,255,0.95);line-height:1.3}
+    .cover-author{font-size:0.65rem;color:rgba(255,255,255,0.65);font-style:italic;letter-spacing:0.04em}
+    .badge{position:absolute;top:1rem;right:1rem;background:var(--gold);color:var(--ink);font-size:0.6rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:4px 8px;border-radius:2px}
+    .book-info{padding:1.2rem}
+    .book-info-title{font-family:'Playfair Display',serif;font-weight:700;font-size:0.95rem;margin-bottom:0.2rem;color:var(--ink)}
+    .book-info-author{font-size:0.78rem;color:var(--fog);margin-bottom:0.8rem}
+    .book-info-footer{display:flex;align-items:center;justify-content:space-between}
+    .price{font-family:'Playfair Display',serif;font-weight:900;font-size:1.15rem;color:var(--rust)}
+    .price-old{font-size:0.72rem;color:var(--fog);text-decoration:line-through;display:block;line-height:1}
+    .add-btn{background:var(--ink);color:var(--white);border:none;width:36px;height:36px;border-radius:50%;font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;line-height:1}
+    .add-btn:hover{background:var(--gold);color:var(--ink)}
+
+    /* BANNER */
+    .banner{background:var(--ink);padding:5rem 8vw;display:grid;grid-template-columns:1fr auto;align-items:center;gap:3rem}
+    .banner-tag{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--gold);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:0.8rem}
+    .banner-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;color:var(--white);line-height:1.2;max-width:22ch}
+    .banner-title em{color:var(--gold);font-style:italic}
+    .banner-desc{font-size:0.95rem;color:rgba(254,252,248,0.55);margin-top:1rem;max-width:45ch;line-height:1.7}
+
+    /* NEWSLETTER */
+    #newsletter{background:var(--cream);text-align:center}
+    .newsletter-form{display:flex;gap:0;max-width:460px;margin:0 auto;border-radius:3px;overflow:hidden;box-shadow:0 4px 24px rgba(26,20,16,0.1)}
+    .newsletter-form input{flex:1;padding:16px 20px;border:1px solid rgba(26,20,16,0.12);border-right:none;background:var(--white);font-family:'Inter',sans-serif;font-size:0.9rem;color:var(--ink);outline:none}
+    .newsletter-form input::placeholder{color:var(--fog)}
+    .newsletter-form button{background:var(--gold);color:var(--ink);border:none;padding:16px 28px;font-family:'Inter',sans-serif;font-weight:700;font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;white-space:nowrap}
+    .newsletter-form button:hover{background:var(--gold-lt)}
+
+    /* FOOTER */
+    footer{background:var(--ink);color:rgba(254,252,248,0.55);padding:4rem 8vw 2.5rem}
+    .footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:3rem;border-bottom:1px solid rgba(184,151,58,0.15);margin-bottom:2rem}
+    .footer-logo{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);margin-bottom:0.8rem;display:block}
+    .footer-logo span{color:var(--white);font-style:italic}
+    .footer-desc{font-size:0.85rem;line-height:1.7;max-width:28ch}
+    .footer-col h4{color:var(--white);font-size:0.75rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:1.2rem;font-family:'Inter',sans-serif}
+    .footer-col ul{list-style:none}
+    .footer-col ul li{margin-bottom:0.6rem}
+    .footer-col ul a{color:rgba(254,252,248,0.5);text-decoration:none;font-size:0.85rem;transition:color 0.2s}
+    .footer-col ul a:hover{color:var(--gold)}
+    .footer-bottom{display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;flex-wrap:wrap;gap:1rem}
+    .footer-bottom a{color:var(--gold);text-decoration:none}
+
+    /* MODAIS */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;backdrop-filter:blur(3px)}
+    .modal-box{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-60%);background:var(--white);z-index:301;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden;transition:transform 0.3s ease,opacity 0.3s ease;opacity:0}
+    .modal-box.open{opacity:1;transform:translate(-50%,-50%)}
+
+    /* SIDEBAR CARRINHO */
+    #cartSidebar{position:fixed;top:0;right:-440px;width:min(440px,100vw);height:100vh;background:var(--white);z-index:201;display:flex;flex-direction:column;box-shadow:-4px 0 32px rgba(0,0,0,0.2);transition:right 0.35s cubic-bezier(.4,0,.2,1)}
+
+    /* MODAL DETALHE DO LIVRO */
+    #bookModal{width:min(760px,96vw);max-height:90vh;overflow-y:auto}
+    .book-detail-grid{display:grid;grid-template-columns:240px 1fr;gap:2rem;padding:2rem}
+    .book-detail-cover{border-radius:4px 8px 8px 4px;height:320px;display:flex;flex-direction:column;justify-content:space-between;padding:1.5rem 1.2rem;box-shadow:6px 8px 28px rgba(0,0,0,0.35),inset -4px 0 10px rgba(0,0,0,0.2);position:relative}
+    .book-detail-cover::before{content:'';position:absolute;left:0;top:0;bottom:0;width:10px;background:rgba(0,0,0,0.2);border-radius:4px 0 0 8px}
+    .stars{color:var(--gold);font-size:1rem;letter-spacing:2px}
+    .tag-pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;background:var(--cream);color:var(--fog);margin:2px}
+
+    /* CHAT */
+    #chatBtn{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;border-radius:50%;background:var(--gold);color:var(--ink);border:none;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 20px rgba(184,151,58,0.4);z-index:150;transition:transform 0.2s,box-shadow 0.2s;display:flex;align-items:center;justify-content:center}
+    #chatBtn:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(184,151,58,0.5)}
+    #chatWindow{position:fixed;bottom:5.5rem;right:2rem;width:min(360px,calc(100vw - 2rem));background:var(--white);border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.2);z-index:149;display:none;flex-direction:column;overflow:hidden;max-height:480px}
+    #chatWindow.open{display:flex}
+    .chat-header{background:var(--ink);padding:1rem 1.2rem;display:flex;align-items:center;gap:0.7rem}
+    .chat-avatar{width:36px;height:36px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+    .chat-header-info{flex:1}
+    .chat-header-name{color:var(--white);font-weight:600;font-size:0.88rem}
+    .chat-header-status{color:var(--gold);font-size:0.7rem}
+    .chat-close{background:none;border:none;color:rgba(254,252,248,0.5);font-size:1.2rem;cursor:pointer}
+    .chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.7rem;background:var(--parchment)}
+    .chat-msg{max-width:80%;padding:0.6rem 0.9rem;border-radius:12px;font-size:0.83rem;line-height:1.5}
+    .chat-msg.bot{background:var(--white);color:var(--ink);align-self:flex-start;border-radius:4px 12px 12px 12px}
+    .chat-msg.user{background:var(--gold);color:var(--ink);align-self:flex-end;border-radius:12px 4px 12px 12px;font-weight:500}
+    .chat-input-row{display:flex;gap:0;border-top:1px solid rgba(26,20,16,0.08)}
+    .chat-input{flex:1;padding:0.8rem 1rem;border:none;font-family:'Inter',sans-serif;font-size:0.85rem;outline:none;background:var(--white);color:var(--ink)}
+    .chat-send{background:var(--gold);border:none;padding:0 1.1rem;cursor:pointer;font-size:1.1rem;color:var(--ink);transition:background 0.2s}
+    .chat-send:hover{background:var(--gold-lt)}
+    .chat-quick{display:flex;flex-wrap:wrap;gap:0.4rem;padding:0.6rem 1rem;background:var(--white);border-top:1px solid rgba(26,20,16,0.06)}
+    .quick-btn{padding:4px 10px;border-radius:12px;border:1px solid rgba(184,151,58,0.4);background:transparent;font-size:0.72rem;cursor:pointer;color:var(--gold);font-family:'Inter',sans-serif;transition:background 0.2s}
+    .quick-btn:hover{background:rgba(184,151,58,0.1)}
+
+    /* FORMS */
+    .f-label{display:block;font-size:0.76rem;font-weight:600;margin-bottom:0.35rem;letter-spacing:0.05em;text-transform:uppercase}
+    .f-input{width:100%;padding:11px 13px;border:1px solid rgba(26,20,16,0.15);border-radius:3px;font-family:'Inter',sans-serif;font-size:0.88rem;background:var(--parchment);color:var(--ink);outline:none;margin-bottom:0.9rem}
+    .f-input:focus{border-color:var(--gold)}
+    .f-grid2{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem}
+
+    /* RESPONSIVE */
+    @media(max-width:768px){
+      .hero{grid-template-columns:1fr;min-height:auto}
+      .hero-text{padding:4rem 6vw 3rem}
+      .hero-visual{display:none}
+      .banner{grid-template-columns:1fr}
+      .footer-top{grid-template-columns:1fr 1fr}
+      .nav-links{display:none}
+      .nav-search-wrap{display:none}
+      .book-detail-grid{grid-template-columns:1fr}
+      .book-detail-cover{height:200px}
+    }
+    @media(max-width:480px){section{padding:4rem 5vw}.footer-top{grid-template-columns:1fr}}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    .animate{animation:fadeUp 0.6s ease both}
+    .delay-1{animation-delay:0.15s}.delay-2{animation-delay:0.3s}.delay-3{animation-delay:0.45s}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+    .typing span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--fog);margin:0 2px;animation:pulse 1.2s infinite}
+    .typing span:nth-child(2){animation-delay:0.2s}.typing span:nth-child(3){animation-delay:0.4s}
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#"><span>Livraria</span> Intelectus</a>
+  <ul class="nav-links">
+    <li><a href="#categorias">Categorias</a></li>
+    <li><a href="#destaques">Destaques</a></li>
+    <li><a href="#newsletter">Newsletter</a></li>
+  </ul>
+  <div class="nav-search-wrap">
+    <input class="nav-search" type="text" id="navSearch" placeholder="Buscar livros, autores..." autocomplete="off"/>
+    <span class="nav-search-icon">🔍</span>
+    <div id="searchDropdown"></div>
+  </div>
+  <div style="display:flex;gap:0.6rem;align-items:center;">
+    <button class="nav-btn nav-btn-ghost" id="loginBtn">👤 Entrar</button>
+    <button class="nav-btn" id="cartBtn">🛒 <span class="cart-badge" id="cartBadge" style="display:none;">0</span></button>
+  </div>
+</nav>
+
+<!-- CARRINHO SIDEBAR -->
+<div id="cartOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;" onclick="closeCart()"></div>
+<div id="cartSidebar">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:1.4rem 1.6rem;border-bottom:1px solid rgba(26,20,16,0.1);background:var(--ink);">
+    <span style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);font-weight:700;">Seu Carrinho</span>
+    <button onclick="closeCart()" style="background:none;border:none;color:rgba(254,252,248,0.7);font-size:1.5rem;cursor:pointer;">✕</button>
+  </div>
+  <div id="cartItems" style="flex:1;overflow-y:auto;padding:1.2rem 1.6rem;display:flex;flex-direction:column;gap:1rem;"></div>
+  <div id="cartEmpty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--fog);padding:2rem;">
+    <div style="font-size:3rem;margin-bottom:1rem;">📚</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:0.4rem;">Seu carrinho está vazio</div>
+    <div style="font-size:0.82rem;">Adicione livros para começar</div>
+  </div>
+  <div id="cartFooter" style="display:none;padding:1.4rem 1.6rem;border-top:1px solid rgba(26,20,16,0.1);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+      <span style="font-weight:600;font-size:0.9rem;">Total</span>
+      <span id="cartTotal" style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--rust);">R$ 0,00</span>
+    </div>
+    <button onclick="openPay()" style="width:100%;background:var(--gold);color:var(--ink);border:none;padding:15px;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;letter-spacing:0.07em;text-transform:uppercase;border-radius:3px;cursor:pointer;" onmouseover="this.style.background='var(--gold-lt)'" onmouseout="this.style.background='var(--gold)'">Finalizar compra</button>
+    <button onclick="clearCart()" style="width:100%;margin-top:0.7rem;background:none;border:1px solid rgba(26,20,16,0.15);padding:10px;font-family:'Inter',sans-serif;font-size:0.8rem;color:var(--fog);border-radius:3px;cursor:pointer;" onmouseover="this.style.borderColor='var(--rust)';this.style.color='var(--rust)'" onmouseout="this.style.borderColor='rgba(26,20,16,0.15)';this.style.color='var(--fog)'">Limpar carrinho</button>
+  </div>
+</div>
+
+<!-- MODAL: LOGIN -->
+<div class="modal-overlay" id="authOverlay" onclick="closeAuth()"></div>
+<div class="modal-box" id="authModal" style="width:min(440px,95vw);">
+  <div style="display:flex;background:var(--ink);">
+    <button id="tabLogin" onclick="switchTab('login')" style="flex:1;padding:1.1rem;border:none;background:var(--gold);color:var(--ink);font-family:'Inter',sans-serif;font-weight:700;font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;">Entrar</button>
+    <button id="tabRegister" onclick="switchTab('register')" style="flex:1;padding:1.1rem;border:none;background:transparent;color:rgba(254,252,248,0.5);font-family:'Inter',sans-serif;font-weight:700;font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;">Criar conta</button>
+    <button onclick="closeAuth()" style="padding:0 1.2rem;border:none;background:transparent;color:rgba(254,252,248,0.5);font-size:1.3rem;cursor:pointer;">✕</button>
+  </div>
+  <div id="panelLogin" style="padding:2rem 2.2rem 2.4rem;">
+    <p style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;margin-bottom:0.4rem;">Bem-vindo de volta</p>
+    <p style="font-size:0.82rem;color:var(--fog);margin-bottom:1.8rem;">Acesse sua conta para ver seus pedidos e favoritos.</p>
+    <label class="f-label">E-mail</label>
+    <input type="email" id="loginEmail" placeholder="seu@email.com" class="f-input"/>
+    <label class="f-label">Senha</label>
+    <input type="password" id="loginPass" placeholder="••••••••" class="f-input" style="margin-bottom:0.5rem;"/>
+    <div style="text-align:right;margin-bottom:1.5rem;"><a href="#" style="font-size:0.78rem;color:var(--gold);text-decoration:none;">Esqueci minha senha</a></div>
+    <button onclick="doLogin()" style="width:100%;background:var(--gold);color:var(--ink);border:none;padding:14px;font-family:'Inter',sans-serif;font-weight:700;font-size:0.88rem;letter-spacing:0.07em;text-transform:uppercase;border-radius:3px;cursor:pointer;" onmouseover="this.style.background='var(--gold-lt)'" onmouseout="this.style.background='var(--gold)'">Entrar na minha conta</button>
+    <p style="text-align:center;font-size:0.8rem;color:var(--fog);margin-top:1.2rem;">Não tem conta? <a href="#" onclick="switchTab('register')" style="color:var(--gold);text-decoration:none;font-weight:600;">Crie agora</a></p>
+  </div>
+  <div id="panelRegister" style="padding:2rem 2.2rem 2.4rem;display:none;">
+    <p style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;margin-bottom:0.4rem;">Crie sua conta</p>
+    <p style="font-size:0.82rem;color:var(--fog);margin-bottom:1.8rem;">Cadastre-se gratuitamente e aproveite benefícios exclusivos.</p>
+    <div class="f-grid2" style="margin-bottom:0.9rem;">
+      <div><label class="f-label">Nome</label><input type="text" placeholder="João" class="f-input" style="margin-bottom:0;"/></div>
+      <div><label class="f-label">Sobrenome</label><input type="text" placeholder="Silva" class="f-input" style="margin-bottom:0;"/></div>
+    </div>
+    <label class="f-label">E-mail</label><input type="email" placeholder="seu@email.com" class="f-input"/>
+    <label class="f-label">Senha</label><input type="password" placeholder="Mínimo 8 caracteres" class="f-input"/>
+    <label class="f-label">Confirmar senha</label><input type="password" placeholder="Repita a senha" class="f-input"/>
+    <button onclick="doRegister()" style="width:100%;background:var(--gold);color:var(--ink);border:none;padding:14px;font-family:'Inter',sans-serif;font-weight:700;font-size:0.88rem;letter-spacing:0.07em;text-transform:uppercase;border-radius:3px;cursor:pointer;" onmouseover="this.style.background='var(--gold-lt)'" onmouseout="this.style.background='var(--gold)'">Criar minha conta</button>
+    <p style="text-align:center;font-size:0.8rem;color:var(--fog);margin-top:1rem;">Já tem conta? <a href="#" onclick="switchTab('login')" style="color:var(--gold);text-decoration:none;font-weight:600;">Entrar</a></p>
+  </div>
+</div>
+
+<!-- MODAL: DETALHE DO LIVRO -->
+<div class="modal-overlay" id="bookOverlay" onclick="closeBook()"></div>
+<div class="modal-box" id="bookModal">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.4rem;background:var(--ink);position:sticky;top:0;z-index:2;">
+    <span style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold);font-weight:700;">Detalhes do livro</span>
+    <button onclick="closeBook()" style="background:none;border:none;color:rgba(254,252,248,0.6);font-size:1.3rem;cursor:pointer;">✕</button>
+  </div>
+  <div class="book-detail-grid" id="bookDetailContent"></div>
+</div>
+
+<!-- MODAL: PAGAMENTO -->
+<div class="modal-overlay" id="payOverlay" onclick="closePay()"></div>
+<div class="modal-box" id="payModal" style="width:min(520px,96vw);max-height:92vh;overflow-y:auto;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.6rem;background:var(--ink);position:sticky;top:0;z-index:1;">
+    <span style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold);font-weight:700;">Finalizar Pedido</span>
+    <button onclick="closePay()" style="background:none;border:none;color:rgba(254,252,248,0.6);font-size:1.3rem;cursor:pointer;">✕</button>
+  </div>
+  <div style="padding:1.6rem;">
+    <!-- Endereço de entrega -->
+    <p style="font-size:0.78rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--fog);margin-bottom:0.8rem;">📦 Endereço de entrega</p>
+    <div class="f-grid2" style="margin-bottom:0.9rem;">
+      <div><label class="f-label">Nome</label><input type="text" placeholder="João Silva" class="f-input" style="margin-bottom:0;"/></div>
+      <div><label class="f-label">CPF</label><input type="text" placeholder="000.000.000-00" class="f-input" style="margin-bottom:0;" oninput="fmtCPF(this)"/></div>
+    </div>
+    <label class="f-label">CEP</label>
+    <div style="display:flex;gap:0.6rem;margin-bottom:0.9rem;">
+      <input type="text" id="cepInput" placeholder="00000-000" class="f-input" style="margin-bottom:0;flex:1;" oninput="fmtCEP(this)"/>
+      <button onclick="buscarCEP()" style="background:var(--ink);color:var(--white);border:none;padding:0 1rem;border-radius:3px;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;" onmouseover="this.style.background='var(--gold)';this.style.color='var(--ink)'" onmouseout="this.style.background='var(--ink)';this.style.color='var(--white)'">Buscar</button>
+    </div>
+    <div class="f-grid2" style="margin-bottom:0.9rem;">
+      <div><label class="f-label">Rua</label><input type="text" id="addrRua" placeholder="Rua das Letras" class="f-input" style="margin-bottom:0;"/></div>
+      <div><label class="f-label">Número</label><input type="text" placeholder="123" class="f-input" style="margin-bottom:0;"/></div>
+    </div>
+    <div class="f-grid2" style="margin-bottom:0.9rem;">
+      <div><label class="f-label">Bairro</label><input type="text" id="addrBairro" placeholder="Centro" class="f-input" style="margin-bottom:0;"/></div>
+      <div><label class="f-label">Complemento</label><input type="text" placeholder="Apto, bloco..." class="f-input" style="margin-bottom:0;"/></div>
+    </div>
+    <div class="f-grid2" style="margin-bottom:1.5rem;">
+      <div><label class="f-label">Cidade</label><input type="text" id="addrCidade" placeholder="São Paulo" class="f-input" style="margin-bottom:0;"/></div>
+      <div><label class="f-label">Estado</label><input type="text" id="addrEstado" placeholder="SP" class="f-input" style="margin-bottom:0;" maxlength="2"/></div>
+    </div>
+
+    <!-- Resumo -->
+    <div style="background:var(--parchment);border-radius:4px;padding:1rem 1.2rem;margin-bottom:1.5rem;border:1px solid rgba(26,20,16,0.08);">
+      <p style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--fog);margin-bottom:0.6rem;">Resumo do pedido</p>
+      <div id="payItemsList" style="font-size:0.85rem;color:var(--ink);"></div>
+      <div style="border-top:1px solid rgba(26,20,16,0.1);margin-top:0.8rem;padding-top:0.8rem;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-weight:700;font-size:0.88rem;">Total</span>
+        <span id="payTotal" style="font-family:'Playfair Display',serif;font-weight:900;font-size:1.2rem;color:var(--rust);"></span>
+      </div>
+    </div>
+
+    <!-- Forma de pagamento -->
+    <p style="font-size:0.78rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--fog);margin-bottom:0.8rem;">💳 Forma de pagamento</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin-bottom:1.5rem;">
+      <button class="pay-method" id="mPix" onclick="selectMethod('pix')" style="padding:1rem;border:2px solid rgba(26,20,16,0.12);border-radius:4px;background:var(--parchment);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:0.4rem;transition:border-color 0.2s;">
+        <span style="font-size:1.6rem;">🟢</span><span style="font-size:0.82rem;font-weight:700;">PIX</span><span style="font-size:0.68rem;color:var(--fog);">Aprovação imediata</span>
+      </button>
+      <button class="pay-method" id="mCard" onclick="selectMethod('card')" style="padding:1rem;border:2px solid rgba(26,20,16,0.12);border-radius:4px;background:var(--parchment);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:0.4rem;transition:border-color 0.2s;">
+        <span style="font-size:1.6rem;">💳</span><span style="font-size:0.82rem;font-weight:700;">Cartão de Crédito</span><span style="font-size:0.68rem;color:var(--fog);">Até 12x sem juros</span>
+      </button>
+      <button class="pay-method" id="mBoleto" onclick="selectMethod('boleto')" style="padding:1rem;border:2px solid rgba(26,20,16,0.12);border-radius:4px;background:var(--parchment);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:0.4rem;transition:border-color 0.2s;">
+        <span style="font-size:1.6rem;">📄</span><span style="font-size:0.82rem;font-weight:700;">Boleto</span><span style="font-size:0.68rem;color:var(--fog);">Vence em 3 dias úteis</span>
+      </button>
+      <button class="pay-method" id="mBtc" onclick="selectMethod('btc')" style="padding:1rem;border:2px solid rgba(26,20,16,0.12);border-radius:4px;background:var(--parchment);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:0.4rem;transition:border-color 0.2s;">
+        <span style="font-size:1.6rem;">₿</span><span style="font-size:0.82rem;font-weight:700;">Bitcoin</span><span style="font-size:0.68rem;color:var(--fog);">Criptomoeda</span>
+      </button>
+    </div>
+
+    <div id="formPix" style="display:none;background:var(--parchment);border-radius:4px;padding:1.2rem;border:1px solid rgba(26,20,16,0.08);text-align:center;margin-bottom:1.2rem;">
+      <div style="font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--fog);margin-bottom:1rem;">Chave PIX</div>
+      <div style="background:var(--white);border-radius:4px;padding:1rem;font-family:'DM Mono',monospace;font-size:0.85rem;color:var(--ink);border:1px solid rgba(26,20,16,0.1);margin-bottom:0.8rem;">intelectus@livraria.com.br</div>
+      <div style="background:var(--ink);border-radius:4px;padding:1.5rem;display:inline-block;margin-bottom:0.8rem;"><div style="width:100px;height:100px;background:repeating-linear-gradient(0deg,var(--white) 0,var(--white) 4px,var(--ink) 4px,var(--ink) 8px);border-radius:2px;"></div></div>
+      <p style="font-size:0.78rem;color:var(--fog);">Escaneie o QR Code ou copie a chave PIX</p>
+    </div>
+    <div id="formCard" style="display:none;margin-bottom:1.2rem;">
+      <label class="f-label">Número do cartão</label><input type="text" placeholder="0000 0000 0000 0000" maxlength="19" oninput="fmtCard(this)" class="f-input"/>
+      <label class="f-label">Nome no cartão</label><input type="text" placeholder="JOÃO DA SILVA" class="f-input"/>
+      <div class="f-grid2" style="margin-bottom:0.9rem;"><div><label class="f-label">Validade</label><input type="text" placeholder="MM/AA" maxlength="5" oninput="fmtDate(this)" class="f-input" style="margin-bottom:0;"/></div><div><label class="f-label">CVV</label><input type="text" placeholder="•••" maxlength="4" class="f-input" style="margin-bottom:0;"/></div></div>
+      <label class="f-label">Parcelas</label>
+      <select class="f-input"><option>1x sem juros</option><option>2x sem juros</option><option>3x sem juros</option><option>6x sem juros</option><option>12x sem juros</option></select>
+    </div>
+    <div id="formBoleto" style="display:none;background:var(--parchment);border-radius:4px;padding:1.2rem;text-align:center;margin-bottom:1.2rem;">
+      <div style="font-size:2rem;margin-bottom:0.6rem;">📄</div>
+      <p style="font-size:0.88rem;font-weight:700;margin-bottom:0.4rem;">Boleto Bancário</p>
+      <p style="font-size:0.8rem;color:var(--fog);line-height:1.6;">Vencimento em <strong>3 dias úteis</strong>. Processado após compensação.</p>
+      <div style="margin-top:1rem;background:var(--white);border:1px solid rgba(26,20,16,0.1);border-radius:3px;padding:0.8rem;font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--fog);">1234.56789 0001.234567 89012.345678 9 01010000018990</div>
+    </div>
+    <div id="formBtc" style="display:none;background:var(--parchment);border-radius:4px;padding:1.2rem;text-align:center;margin-bottom:1.2rem;">
+      <div style="font-size:2rem;margin-bottom:0.6rem;">₿</div>
+      <p style="font-size:0.88rem;font-weight:700;margin-bottom:0.4rem;">Pagamento em Bitcoin</p>
+      <div style="background:var(--white);border-radius:4px;padding:0.8rem;font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--ink);border:1px solid rgba(26,20,16,0.1);margin:0.8rem 0;word-break:break-all;">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</div>
+      <p style="font-size:0.75rem;color:var(--fog);line-height:1.6;">Envie exatamente em BTC. Liberado após <strong>1 confirmação</strong>.</p>
+    </div>
+
+    <button id="confirmPayBtn" onclick="confirmPayment()" style="display:none;width:100%;background:var(--gold);color:var(--ink);border:none;padding:15px;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;letter-spacing:0.07em;text-transform:uppercase;border-radius:3px;cursor:pointer;" onmouseover="this.style.background='var(--gold-lt)'" onmouseout="this.style.background='var(--gold)'">Confirmar pagamento</button>
+    <p style="text-align:center;font-size:0.72rem;color:var(--fog);margin-top:0.8rem;">🔒 Pagamento 100% seguro e criptografado</p>
+  </div>
+</div>
+
+<!-- CHAT -->
+<button id="chatBtn" title="Chat de suporte">💬</button>
+<div id="chatWindow">
+  <div class="chat-header">
+    <div class="chat-avatar">📚</div>
+    <div class="chat-header-info">
+      <div class="chat-header-name">Suporte Intelectus</div>
+      <div class="chat-header-status">● Online agora</div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-quick" id="chatQuick">
+    <button class="quick-btn" onclick="quickMsg('Quero rastrear meu pedido')">📦 Rastrear pedido</button>
+    <button class="quick-btn" onclick="quickMsg('Como funciona a troca?')">🔄 Trocas e devoluções</button>
+    <button class="quick-btn" onclick="quickMsg('Quais formas de pagamento vocês aceitam?')">💳 Formas de pagamento</button>
+    <button class="quick-btn" onclick="quickMsg('Qual o prazo de entrega?')">🚚 Prazo de entrega</button>
+  </div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="chatInput" type="text" placeholder="Digite sua mensagem..." onkeydown="if(event.key==='Enter')sendChat()"/>
+    <button class="chat-send" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-text">
+    <p class="hero-eyebrow animate">Bem-vindo à Livraria Intelectus</p>
+    <h1 class="hero-title animate delay-1">Cada livro,<br><em>uma janela</em><br>para o mundo.</h1>
+    <p class="hero-desc animate delay-2">Mais de 12.000 títulos cuidadosamente selecionados — clássicos atemporais, lançamentos imperdíveis e obras que transformam perspectivas.</p>
+    <div class="hero-ctas animate delay-3">
+      <a href="#destaques" class="btn-primary">Ver destaques</a>
+      <a href="#categorias" class="btn-outline">Explorar categorias</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div style="position:relative;padding-bottom:16px;">
+      <div class="bookshelf">
+        <div class="book b1"><span class="book-spine">Dom Casmurro</span></div>
+        <div class="book b2"><span class="book-spine">O Alquimista</span></div>
+        <div class="book b3"><span class="book-spine">Sapiens</span></div>
+        <div class="book b4"><span class="book-spine">Grande Sertão</span></div>
+        <div class="book b5"><span class="book-spine">1984</span></div>
+        <div class="book b6"><span class="book-spine">Cem Anos de Solidão</span></div>
+        <div class="book b7"><span class="book-spine">A Metamorfose</span></div>
+        <div class="book b8"><span class="book-spine">Crime e Castigo</span></div>
+        <div class="book b9"><span class="book-spine">O Senhor dos Anéis</span></div>
+        <div class="book b10"><span class="book-spine">Ulysses</span></div>
+        <div class="book b11"><span class="book-spine">Em Busca do Tempo Perdido</span></div>
+        <div class="book b12"><span class="book-spine">O Nome da Rosa</span></div>
+      </div>
+      <div class="shelf-board"></div>
+    </div>
+  </div>
+</section>
+
+<!-- STRIP -->
+<div class="strip">
+  <div class="strip-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Frete grátis acima de R$ 150</div>
+  <div class="strip-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>E-books disponíveis</div>
+  <div class="strip-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Pagamento seguro</div>
+  <div class="strip-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Retira na loja</div>
+</div>
+
+<!-- CATEGORIAS -->
+<section id="categorias">
+  <div class="section-label">Navegue por</div>
+  <h2 class="section-title">Categorias</h2>
+  <p class="section-sub">Encontre exatamente o que procura — da filosofia ao romance, da ciência à poesia.</p>
+  <div class="cat-filter-bar">
+    <button class="cat-filter-btn active" onclick="filterCats('todos',this)">Todos</button>
+    <button class="cat-filter-btn" onclick="filterCats('humanas',this)">Humanas</button>
+    <button class="cat-filter-btn" onclick="filterCats('exatas',this)">Exatas & Ciências</button>
+    <button class="cat-filter-btn" onclick="filterCats('arte',this)">Arte & Cultura</button>
+    <button class="cat-filter-btn" onclick="filterCats('negocios',this)">Negócios</button>
+  </div>
+  <div class="cat-grid">
+    <a href="#" class="cat-card" data-group="humanas" onclick="filterBooks('Literatura',event)"><span class="cat-icon">📚</span><div class="cat-name">Literatura</div><div class="cat-count">2.340 títulos</div></a>
+    <a href="#" class="cat-card" data-group="humanas" onclick="filterBooks('Filosofia',event)"><span class="cat-icon">🧠</span><div class="cat-name">Filosofia</div><div class="cat-count">870 títulos</div></a>
+    <a href="#" class="cat-card" data-group="exatas" onclick="filterBooks('Ciências',event)"><span class="cat-icon">🔬</span><div class="cat-name">Ciências</div><div class="cat-count">1.120 títulos</div></a>
+    <a href="#" class="cat-card" data-group="humanas" onclick="filterBooks('História',event)"><span class="cat-icon">🏛️</span><div class="cat-name">História</div><div class="cat-count">980 títulos</div></a>
+    <a href="#" class="cat-card" data-group="humanas" onclick="filterBooks('Política',event)"><span class="cat-icon">🌍</span><div class="cat-name">Política</div><div class="cat-count">640 títulos</div></a>
+    <a href="#" class="cat-card" data-group="arte" onclick="filterBooks('Poesia',event)"><span class="cat-icon">🎭</span><div class="cat-name">Teatro & Poesia</div><div class="cat-count">530 títulos</div></a>
+    <a href="#" class="cat-card" data-group="arte" onclick="filterBooks('Infantojuvenil',event)"><span class="cat-icon">👶</span><div class="cat-name">Infantojuvenil</div><div class="cat-count">1.450 títulos</div></a>
+    <a href="#" class="cat-card" data-group="negocios" onclick="filterBooks('Negócios',event)"><span class="cat-icon">💼</span><div class="cat-name">Negócios</div><div class="cat-count">760 títulos</div></a>
+    <a href="#" class="cat-card" data-group="exatas" onclick="filterBooks('Tecnologia',event)"><span class="cat-icon">🖥️</span><div class="cat-name">Tecnologia</div><div class="cat-count">490 títulos</div></a>
+    <a href="#" class="cat-card" data-group="arte" onclick="filterBooks('Arte',event)"><span class="cat-icon">🎨</span><div class="cat-name">Arte & Design</div><div class="cat-count">380 títulos</div></a>
+  </div>
+</section>
+
+<!-- DESTAQUES -->
+<section id="destaques">
+  <div class="section-label">Seleção da semana</div>
+  <h2 class="section-title">Destaques</h2>
+  <p class="section-sub">Obras escolhidas pela nossa equipe de curadores — para quem leva a leitura a sério.</p>
+  <div class="books-filter-bar">
+    <button class="books-filter-btn active" onclick="filterBooksBy('todos',this)">Todos</button>
+    <button class="books-filter-btn" onclick="filterBooksBy('Literatura',this)">Literatura</button>
+    <button class="books-filter-btn" onclick="filterBooksBy('História',this)">História</button>
+    <button class="books-filter-btn" onclick="filterBooksBy('Ciências',this)">Ciências</button>
+    <button class="books-filter-btn" onclick="filterBooksBy('Filosofia',this)">Filosofia</button>
+    <button class="books-filter-btn" onclick="filterBooksBy('Negócios',this)">Negócios</button>
+  </div>
+  <div class="books-grid" id="booksGrid">
+    <div class="book-card" data-cat="Literatura" data-id="0">
+      <div class="book-cover" style="background:#1a1a3e;" onclick="openBook(0)">
+        <div class="badge">Mais vendido</div>
+        <div class="book-cover-inner" style="background:linear-gradient(145deg,#1e2a6e,#0d1440);">
+          <div class="cover-title">Cem Anos de Solidão</div><div class="cover-author">Gabriel García Márquez</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <div class="book-info-title" onclick="openBook(0)" style="cursor:pointer;">Cem Anos de Solidão</div>
+        <div class="book-info-author">Gabriel García Márquez</div>
+        <div class="book-info-footer">
+          <div><span class="price-old">R$ 59,90</span><span class="price">R$ 44,90</span></div>
+          <button class="add-btn" title="Adicionar ao carrinho">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" data-cat="História" data-id="1">
+      <div class="book-cover" style="background:#1e3a1a;" onclick="openBook(1)">
+        <div class="book-cover-inner" style="background:linear-gradient(145deg,#2d5a20,#1a3812);">
+          <div class="cover-title">Sapiens: Uma Breve História da Humanidade</div><div class="cover-author">Yuval Noah Harari</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <div class="book-info-title" onclick="openBook(1)" style="cursor:pointer;">Sapiens</div>
+        <div class="book-info-author">Yuval Noah Harari</div>
+        <div class="book-info-footer">
+          <div><span class="price">R$ 49,90</span></div>
+          <button class="add-btn" title="Adicionar ao carrinho">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" data-cat="Literatura" data-id="2">
+      <div class="book-cover" style="background:#1a1210;padding:0;" onclick="openBook(2)">
+        <div class="badge">Lançamento</div>
+        <img src="crime-e-castigo.jpg" alt="Crime e Castigo" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;"/>
+      </div>
+      <div class="book-info">
+        <div class="book-info-title" onclick="openBook(2)" style="cursor:pointer;">Crime e Castigo</div>
+        <div class="book-info-author">Fiódor Dostoiévski</div>
+        <div class="book-info-footer">
+          <div><span class="price-old">R$ 69,90</span><span class="price">R$ 52,90</span></div>
+          <button class="add-btn" title="Adicionar ao carrinho">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" data-cat="Literatura" data-id="3">
+      <div class="book-cover" style="background:#2a1e4a;" onclick="openBook(3)">
+        <div class="book-cover-inner" style="background:linear-gradient(145deg,#3a2a6e,#1e1238);">
+          <div class="cover-title">O Nome da Rosa</div><div class="cover-author">Umberto Eco</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <div class="book-info-title" onclick="openBook(3)" style="cursor:pointer;">O Nome da Rosa</div>
+        <div class="book-info-author">Umberto Eco</div>
+        <div class="book-info-footer">
+          <div><span class="price">R$ 57,90</span></div>
+          <button class="add-btn" title="Adicionar ao carrinho">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" data-cat="Filosofia" data-id="4">
+      <div class="book-cover" style="background:#1a2a1a;" onclick="openBook(4)">
+        <div class="book-cover-inner" style="background:linear-gradient(145deg,#2a4a1a,#162810);">
+          <div class="cover-title">O Mundo de Sofia</div><div class="cover-author">Jostein Gaarder</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <div class="book-info-title" onclick="openBook(4)" style="cursor:pointer;">O Mundo de Sofia</div>
+        <div class="book-info-author">Jostein Gaarder</div>
+        <div class="book-info-footer">
+          <div><span class="price-old">R$ 54,90</span><span class="price">R$ 39,90</span></div>
+          <button class="add-btn" title="Adicionar ao carrinho">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" data-cat="Negócios" data-id="5">
+      <div class="book-cover" style="background:#2a1a0a;" onclick="openBook(5)">
+        <div class="book-cover-inner" style="background:linear-gradient(145deg,#4a3010,#2a1a08);">
+          <div class="cover-title">De Zero a Um</div><div class="cover-author">Peter Thiel</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <div class="book-info-title" onclick="openBook(5)" style="cursor:pointer;">De Zero a Um</div>
+        <div class="book-info-author">Peter Thiel</div>
+        <div class="book-info-footer">
+          <div><span class="price">R$ 46,90</span></div>
+          <button class="add-btn" title="Adicionar ao carrinho">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" data-cat="Ciências" data-id="6">
+      <div class="book-cover" style="background:#0a1a2a;" onclick="openBook(6)">
+        <div class="book-cover-inner" style="background:linear-gradient(145deg,#102a4a,#081420);">
+          <div class="cover-title">Uma Breve História do Tempo</div><div class="cover-author">Stephen Hawking</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <div class="book-info-title" onclick="openBook(6)" style="cursor:pointer;">Uma Breve História do Tempo</div>
+        <div class="book-info-author">Stephen Hawking</div>
+        <div class="book-info-footer">
+          <div><span class="price-old">R$ 62,90</span><span class="price">R$ 47,90</span></div>
+          <button class="add-btn" title="Adicionar ao carrinho">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" data-cat="História" data-id="7">
+      <div class="book-cover" style="background:#1a0a0a;" onclick="openBook(7)">
+        <div class="book-cover-inner" style="background:linear-gradient(145deg,#3a1010,#200808);">
+          <div class="cover-title">1984</div><div class="cover-author">George Orwell</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <div class="book-info-title" onclick="openBook(7)" style="cursor:pointer;">1984</div>
+        <div class="book-info-author">George Orwell</div>
+        <div class="book-info-footer">
+          <div><span class="price">R$ 38,90</span></div>
+          <button class="add-btn" title="Adicionar ao carrinho">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BANNER -->
+<div class="banner">
+  <div>
+    <div class="banner-tag">Clube de Assinatura</div>
+    <h2 class="banner-title">Leia mais por <em>menos</em> com o Clube Intelectus.</h2>
+    <p class="banner-desc">Receba todo mês uma seleção exclusiva de livros curada por nossos especialistas com até 40% de desconto e frete grátis.</p>
+    <a href="#" class="btn-primary" style="margin-top:2rem;display:inline-block;">Quero assinar</a>
+  </div>
+  <div style="font-size:6rem;line-height:1;opacity:0.12;font-family:'Playfair Display',serif;font-weight:900;color:var(--gold);user-select:none;">§</div>
+</div>
+
+<!-- NEWSLETTER -->
+<section id="newsletter">
+  <div class="section-label">Fique por dentro</div>
+  <h2 class="section-title" style="text-align:center;margin:0 auto 0.8rem;">Novidades na sua caixa de entrada</h2>
+  <p class="section-sub" style="text-align:center;margin:0 auto 2.5rem;">Receba recomendações de leitura, lançamentos e promoções exclusivas toda semana.</p>
+  <form class="newsletter-form" onsubmit="event.preventDefault();alert('Obrigado por se inscrever!')">
+    <input type="email" placeholder="Seu melhor e-mail" required/>
+    <button type="submit">Inscrever</button>
+  </form>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <span class="footer-logo"><span>Livraria</span> Intelectus</span>
+      <p class="footer-desc">Uma livraria para quem acredita que ler é o ato mais revolucionário de todos.</p>
+    </div>
+    <div class="footer-col"><h4>Livraria</h4><ul><li><a href="#">Catálogo</a></li><li><a href="#">Lançamentos</a></li><li><a href="#">Mais vendidos</a></li><li><a href="#">E-books</a></li></ul></div>
+    <div class="footer-col"><h4>Empresa</h4><ul><li><a href="#">Sobre nós</a></li><li><a href="#">Clube Intelectus</a></li><li><a href="#">Blog literário</a></li><li><a href="#">Trabalhe conosco</a></li></ul></div>
+    <div class="footer-col"><h4>Contato</h4><ul><li><a href="#">contato@intelectus.com.br</a></li><li><a href="#">(87) 9 9999-0000</a></li><li><a href="#">Instagram</a></li><li><a href="#">WhatsApp</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Livraria Intelectus. Todos os direitos reservados.</span>
+    <span><a href="#">Política de privacidade</a> · <a href="#">Termos de uso</a></span>
+  </div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════
+// FILTRO DE CATEGORIAS
+// ══════════════════════════════════════════════════════
+function filterCats(group, btn) {
+  document.querySelectorAll('.cat-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.cat-card').forEach(card => {
+    if (group === 'todos' || card.dataset.group === group) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+function filterBooks(cat, e) {
+  e.preventDefault();
+  // Scroll to destaques
+  document.getElementById('destaques').scrollIntoView({ behavior: 'smooth' });
+  // Activate the correct filter button
+  setTimeout(() => {
+    const btns = document.querySelectorAll('.books-filter-btn');
+    btns.forEach(b => {
+      b.classList.remove('active');
+      if (b.textContent.trim() === cat) b.classList.add('active');
+    });
+    // Filter the book cards
+    document.querySelectorAll('.book-card').forEach(card => {
+      card.style.display = (card.dataset.cat === cat) ? 'block' : 'none';
+    });
+  }, 400);
+}
+
+function filterBooksBy(cat, btn) {
+  document.querySelectorAll('.books-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.book-card').forEach(card => {
+    card.style.display = (cat === 'todos' || card.dataset.cat === cat) ? 'block' : 'none';
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// DADOS DOS LIVROS
+// ══════════════════════════════════════════════════════
+const BOOKS = [
+  { title:'Cem Anos de Solidão', author:'Gabriel García Márquez', price:44.90, oldPrice:59.90, cat:'Literatura', color:'linear-gradient(145deg,#1e2a6e,#0d1440)', rating:5, pages:448, year:1967, isbn:'978-85-0000-001-1', desc:'A obra-prima do realismo mágico narra a história da família Buendía ao longo de sete gerações na cidade fictícia de Macondo. Uma das maiores histórias já escritas.' },
+  { title:'Sapiens', author:'Yuval Noah Harari', price:49.90, oldPrice:null, cat:'História', color:'linear-gradient(145deg,#2d5a20,#1a3812)', rating:5, pages:464, year:2011, isbn:'978-85-0000-002-2', desc:'Uma releitura ousada da história da humanidade, desde a pré-história até os dias atuais. Harari explora como o Homo sapiens se tornou a espécie dominante do planeta.' },
+  { title:'Crime e Castigo', author:'Fiódor Dostoiévski', price:52.90, oldPrice:69.90, cat:'Literatura', color:'linear-gradient(145deg,#7a2e14,#4a1a0a)', coverImg:'crime-e-castigo.jpg', rating:4, pages:560, year:1866, isbn:'978-85-0000-003-3', desc:'Um estudante pobre comete um assassinato e passa a ser atormentado pela culpa. Um dos maiores romances psicológicos de todos os tempos, mergulhando nos abismos da mente humana.' },
+  { title:'O Nome da Rosa', author:'Umberto Eco', price:57.90, oldPrice:null, cat:'Literatura', color:'linear-gradient(145deg,#3a2a6e,#1e1238)', rating:5, pages:502, year:1980, isbn:'978-85-0000-004-4', desc:'Itália, século XIV. Um monge franciscano e seu aprendiz investigam uma série de mortes misteriosas num mosteiro medieval. Um thriller intelectual fascinante.' },
+  { title:'O Mundo de Sofia', author:'Jostein Gaarder', price:39.90, oldPrice:54.90, cat:'Filosofia', color:'linear-gradient(145deg,#2a4a1a,#162810)', rating:4, pages:558, year:1991, isbn:'978-85-0000-005-5', desc:'Uma adolescente começa a receber cartas misteriosas sobre filosofia. Uma introdução magistral ao pensamento filosófico ocidental, da Grécia Antiga à era moderna.' },
+  { title:'De Zero a Um', author:'Peter Thiel', price:46.90, oldPrice:null, cat:'Negócios', color:'linear-gradient(145deg,#4a3010,#2a1a08)', rating:4, pages:224, year:2014, isbn:'978-85-0000-006-6', desc:'Peter Thiel, cofundador do PayPal, compartilha suas visões sobre como construir empresas que criam algo verdadeiramente novo — indo de zero a um, e não de um a n.' },
+  { title:'Uma Breve História do Tempo', author:'Stephen Hawking', price:47.90, oldPrice:62.90, cat:'Ciências', color:'linear-gradient(145deg,#102a4a,#081420)', rating:5, pages:212, year:1988, isbn:'978-85-0000-007-7', desc:'Stephen Hawking explora questões fundamentais sobre o universo — o Big Bang, os buracos negros, o tempo e o espaço — de forma acessível e fascinante.' },
+  { title:'1984', author:'George Orwell', price:38.90, oldPrice:null, cat:'História', color:'linear-gradient(145deg,#3a1010,#200808)', rating:5, pages:328, year:1949, isbn:'978-85-0000-008-8', desc:'Em um futuro distópico, Winston Smith vive sob o domínio totalitário do Grande Irmão. Um dos romances mais influentes do século XX sobre controle, liberdade e verdade.' }
+];
+
+// ══════════════════════════════════════════════════════
+// CARRINHO
+// ══════════════════════════════════════════════════════
+let cart = [];
+
+function openCart()  { document.getElementById('cartSidebar').style.right='0'; document.getElementById('cartOverlay').style.display='block'; document.body.style.overflow='hidden'; }
+function closeCart() { document.getElementById('cartSidebar').style.right='-440px'; document.getElementById('cartOverlay').style.display='none'; document.body.style.overflow=''; }
+
+function updateCartUI() {
+  const badge=document.getElementById('cartBadge'), items=document.getElementById('cartItems'), empty=document.getElementById('cartEmpty'), footer=document.getElementById('cartFooter'), total=document.getElementById('cartTotal');
+  const count = cart.reduce((s,i)=>s+i.qty,0);
+  badge.textContent=count; badge.style.display=count>0?'inline-flex':'none';
+  if(!cart.length){ empty.style.display='flex'; footer.style.display='none'; items.innerHTML=''; return; }
+  empty.style.display='none'; footer.style.display='block';
+  items.innerHTML=cart.map((item,idx)=>`
+    <div style="display:flex;gap:1rem;align-items:flex-start;padding:1rem;background:var(--parchment);border-radius:4px;border:1px solid rgba(26,20,16,0.07);">
+      <div style="width:42px;height:58px;background:var(--ink);border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;">📖</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:0.9rem;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.title}</div>
+        <div style="font-size:0.75rem;color:var(--fog);margin-bottom:0.6rem;">${item.author}</div>
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+          <button onclick="changeQty(${idx},-1)" style="width:26px;height:26px;border:1px solid rgba(26,20,16,0.2);background:var(--white);border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">−</button>
+          <span style="font-size:0.9rem;font-weight:600;min-width:1.2rem;text-align:center;">${item.qty}</span>
+          <button onclick="changeQty(${idx},1)"  style="width:26px;height:26px;border:1px solid rgba(26,20,16,0.2);background:var(--white);border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">+</button>
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-family:'Playfair Display',serif;font-weight:900;font-size:1rem;color:var(--rust);">R$ ${(item.price*item.qty).toFixed(2).replace('.',',')}</div>
+        <button onclick="removeItem(${idx})" style="background:none;border:none;color:var(--fog);font-size:0.72rem;cursor:pointer;margin-top:6px;text-decoration:underline;">remover</button>
+      </div>
+    </div>`).join('');
+  total.textContent='R$ '+cart.reduce((s,i)=>s+i.price*i.qty,0).toFixed(2).replace('.',',');
+}
+
+function addToCart(title,author,price,btn) {
+  const ex=cart.find(i=>i.title===title);
+  if(ex) ex.qty++; else cart.push({title,author,price,qty:1});
+  updateCartUI();
+  btn.textContent='✓'; btn.style.background='#2d5a20';
+  setTimeout(()=>{ btn.textContent='+'; btn.style.background=''; },1200);
+}
+function changeQty(idx,d){ cart[idx].qty+=d; if(cart[idx].qty<=0) cart.splice(idx,1); updateCartUI(); }
+function removeItem(idx){ cart.splice(idx,1); updateCartUI(); }
+function clearCart(){ if(confirm('Remover todos os itens?')){ cart=[]; updateCartUI(); } }
+
+document.getElementById('cartBtn').addEventListener('click',openCart);
+
+// Bind add-to-cart
+document.querySelectorAll('.add-btn').forEach((btn,i)=>{
+  const card=btn.closest('.book-card');
+  const title=card.querySelector('.book-info-title').textContent;
+  const author=card.querySelector('.book-info-author').textContent;
+  const priceEl=card.querySelector('.price');
+  const price=parseFloat(priceEl.textContent.replace('R$ ','').replace(',','.'));
+  btn.addEventListener('click',(e)=>{ e.stopPropagation(); addToCart(title,author,price,btn); });
+});
+
+// ══════════════════════════════════════════════════════
+// MODAL DETALHE DO LIVRO
+// ══════════════════════════════════════════════════════
+function openBook(id) {
+  const b=BOOKS[id];
+  const stars='★'.repeat(b.rating)+'☆'.repeat(5-b.rating);
+  const coverHTML = b.coverImg
+    ? `<img src="${b.coverImg}" alt="${b.title}" style="width:100%;height:320px;object-fit:cover;object-position:center top;border-radius:4px 8px 8px 4px;box-shadow:6px 8px 28px rgba(0,0,0,0.35);display:block;"/>`
+    : `<div class="book-detail-cover" style="background:${b.color};">
+        <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:rgba(255,255,255,0.95);line-height:1.3;">${b.title}</div>
+        <div style="font-size:0.7rem;color:rgba(255,255,255,0.6);font-style:italic;">${b.author}</div>
+       </div>`;
+  document.getElementById('bookDetailContent').innerHTML=`
+    <div>${coverHTML}</div>
+    <div>
+      <p style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--gold);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:0.5rem;">${b.cat}</p>
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;line-height:1.2;margin-bottom:0.3rem;">${b.title}</h2>
+      <p style="font-size:0.88rem;color:var(--fog);margin-bottom:0.8rem;">${b.author}</p>
+      <div class="stars" style="margin-bottom:1rem;">${stars} <span style="font-family:'Inter',sans-serif;font-size:0.75rem;color:var(--fog);margin-left:4px;">${b.rating}/5</span></div>
+      <p style="font-size:0.9rem;color:var(--fog);line-height:1.75;margin-bottom:1.5rem;">${b.desc}</p>
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+        <span class="tag-pill">📄 ${b.pages} páginas</span>
+        <span class="tag-pill">📅 ${b.year}</span>
+        <span class="tag-pill">ISBN ${b.isbn}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:1.2rem;margin-bottom:1.5rem;">
+        ${b.oldPrice?`<span style="font-size:0.82rem;color:var(--fog);text-decoration:line-through;">R$ ${b.oldPrice.toFixed(2).replace('.',',')}</span>`:''}
+        <span style="font-family:'Playfair Display',serif;font-weight:900;font-size:2rem;color:var(--rust);">R$ ${b.price.toFixed(2).replace('.',',')}</span>
+        ${b.oldPrice?`<span style="background:#2d5a20;color:#fff;font-size:0.72rem;font-weight:700;padding:3px 8px;border-radius:3px;">-${Math.round((1-b.price/b.oldPrice)*100)}% OFF</span>`:''}
+      </div>
+      <button onclick="addToCartDirect(${id})" style="width:100%;background:var(--gold);color:var(--ink);border:none;padding:14px;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;letter-spacing:0.07em;text-transform:uppercase;border-radius:3px;cursor:pointer;margin-bottom:
